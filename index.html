@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ssc score</title>
+</head>
+<body>
+    <input type="url" name="keyUrl" id="keyUrl">
+    <button id="submit">submit</button>
+</body>
+
+<script>
+    document.getElementById('submit').addEventListener('click',async()=>{
+        let url = document.getElementById('keyUrl').value;
+        let res = await fetch(url)
+        let html = await res.text()
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html,'text/html')
+        console.log(doc)
+        getScore(doc)
+        if(getScore){
+            document.body.appendChild(doc.body)
+        }
+    })
+
+
+    function getScore(doc){
+        let rightans = doc.querySelectorAll('.rightAns') ;
+        let resultarr = [] ;
+             rightans.forEach((el)=>{
+             resultarr.push(el.textContent.slice(0,1))
+          })
+         let selectedans = doc.querySelectorAll('.menu-tbl>tbody');
+         let selectedArr =[]
+             selectedans.forEach((el)=>{
+             selectedArr.push(el.childNodes[6].textContent.slice(15,16))
+       })
+    let scorearr = [0,0,0];
+    let statusarr =[];
+    for(let i =0; i<100;i++){
+        if(selectedArr[i]==" ") {
+           scorearr[2]++;
+           statusarr.push('skipped');
+           rightans[i].parentElement.parentElement.parentElement.parentElement.style.background ="#ececec";
+        }
+        else if (selectedArr[i] == resultarr[i]){
+            scorearr[0]++;
+            statusarr.push('correct');
+            rightans[i].parentElement.parentElement.parentElement.parentElement.style.background ="#cde6c2";
+        }
+        else{
+            scorearr[1]++;
+            statusarr.push('wrong');
+            rightans[i].parentElement.parentElement.parentElement.parentElement.style.background ="#f4cece";
+        }
+    }
+    let score = scorearr[0]*2 - scorearr[1]/4;
+    let result ={
+        score :score,
+        correct: scorearr[0],
+        wrong: scorearr[1],
+        skipped:scorearr[2],
+        granular:statusarr
+    }
+console.log(result)
+alert(score)
+    let a = document.createElement('h3');
+    a.textContent = `score:${score},  correct:${result.correct},  wrong:${result.wrong}, skipped:${result.skipped}` ;
+    a.style.fontSize = "20px" ;
+    a.style.margin = "10px 10px";
+    document.body.appendChild(a);
+    }
+</script>
+</html>
